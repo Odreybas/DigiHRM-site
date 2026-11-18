@@ -1,23 +1,53 @@
-import { Link } from 'react-router-dom'
-import { useAuth } from '../auth.jsx'
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { supabase } from '../supabase'
+import { ProductCard, ServiceCard } from '../components/Cards.jsx'
+
+const CHIPS = [
+  ['all', 'All'], ['people', 'People'], ['products', 'Products'],
+  ['services', 'Services'], ['jobs', 'Jobs'], ['businesses', 'Businesses'],
+]
 
 export default function Home() {
-  const { user } = useAuth()
+  const nav = useNavigate()
+  const [q, setQ] = useState('')
+  const [tab, setTab] = useState('all')
+  const [products, setProducts] = useState([])
+  const [services, setServices] = useState([])
+
+  useEffect(() => {
+    supabase.from('products').select('*,businesses(name)').order('created_at', { ascending: false }).limit(4)
+      .then(({ data }) => setProducts(data || []))
+    supabase.from('services').select('*,businesses(name)').order('created_at', { ascending: false }).limit(4)
+      .then(({ data }) => setServices(data || []))
+  }, [])
+
+  function go(e) {
+    e.preventDefault()
+    nav(`/explore?tab=${tab}&q=${encodeURIComponent(q)}`)
+  }
+
   return (
-    <section className="hero">
-      <h1>Find people, skills and businesses near you.</h1>
-      <p>
-        Build a profile, list your skills, register your business, and get found by the
-        people who need you. One account does it all.
-      </p>
-      <div className="row">
-        <Link className="btn" to="/explore">Explore</Link>
-        {user ? (
-          <Link className="btn ghost" to="/dashboard">Go to dashboard</Link>
-        ) : (
-          <Link className="btn ghost" to="/login">Create an account</Link>
-        )}
-      </div>
-    </section>
+    <>
+      <h2>Discover</h2>
+      <p className="muted">Find people, products, services and opportunities.</p>
+      <form onSubmit={go}>
+        <input placeholder="Search people, products, services..." value={q} onChange={(e) => setQ(e.target.value)} />
+        <div className="chips pick" style={{ margin: '10px 0' }}>
+          {CHIPS.map(([key, label]) => (
+            <button type="button" key={key} className={tab === key ? 'on' : ''} onClick={() => setTab(key)}>{label}</button>
+          ))}
+        </div>
+        <button className="btn">Search</button>
+      </form>
+
+      <h3>Latest products</h3>
+      {products.length === 0 && <p className="muted">No products yet. Be the first to add one from the Create tab.</p>}
+      {products.map((p) => <ProductCard key={p.id} p={p} />)}
+
+      <h3>Latest services</h3>
+      {services.length === 0 && <p className="muted">No services yet.</p>}
+      {services.map((s) => <ServiceCard key={s.id} s={s} />)}
+    </>
   )
 }

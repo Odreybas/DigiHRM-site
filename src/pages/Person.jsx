@@ -1,26 +1,31 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { supabase, capLabel } from '../supabase'
+import { ServiceCard } from '../components/Cards.jsx'
+import SaveButton from '../components/SaveButton.jsx'
 
 export default function Person() {
   const { id } = useParams()
   const [p, setP] = useState(undefined)
   const [skills, setSkills] = useState([])
   const [biz, setBiz] = useState([])
+  const [services, setServices] = useState([])
 
   useEffect(() => {
     supabase.from('profiles').select('*').eq('id', id).maybeSingle().then(({ data }) => setP(data))
     supabase.from('profile_skills').select('skills(name)').eq('profile_id', id).then(({ data }) =>
       setSkills((data || []).map((r) => r.skills?.name).filter(Boolean)))
     supabase.from('businesses').select('id,name,category').eq('owner_id', id).then(({ data }) => setBiz(data || []))
+    supabase.from('services').select('*,businesses(name)').eq('owner_id', id).then(({ data }) => setServices(data || []))
   }, [id])
 
   if (p === undefined) return <p className="muted">Loading...</p>
   if (!p) return <p>This profile does not exist.</p>
 
   return (
+    <>
     <div className="card">
-      <h2>{p.full_name || 'Unnamed'}</h2>
+      <div className="between"><h2>{p.full_name || 'Unnamed'}</h2><SaveButton kind="person" id={p.id} /></div>
       <p className="muted">{p.title}{p.location ? ` - ${p.location}` : ''}</p>
       {p.bio && <p>{p.bio}</p>}
       <h3>Skills</h3>
@@ -34,5 +39,7 @@ export default function Person() {
         </>
       )}
     </div>
+    {services.length > 0 && <><h3>Services offered</h3>{services.map((s) => <ServiceCard key={s.id} s={s} />)}</>}
+    </>
   )
 }

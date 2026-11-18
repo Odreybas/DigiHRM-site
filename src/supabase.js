@@ -23,3 +23,54 @@ export const capLabel = (key) => (CAPABILITIES.find((c) => c[0] === key) || [key
 
 // remove characters that break the search filter
 export const clean = (s) => s.replace(/[,()%*]/g, ' ').trim()
+
+export const PRODUCT_CATEGORIES = [
+  'Electronics and computer accessories',
+  'Construction materials, steel and metal',
+  'Furniture',
+  'Agricultural products',
+  'Industrial equipment and machinery',
+  'Clothing and fashion',
+  'Food products',
+  'Automotive products',
+  'Office equipment',
+  'Raw materials and household products',
+]
+
+export const SERVICE_CATEGORIES = [
+  'Plumbing and electrical',
+  'Construction, carpentry, welding and painting',
+  'Cleaning',
+  'Photography and graphic design',
+  'Web development and IT support',
+  'Computer repair',
+  'Transport',
+  'Catering and event planning',
+  'Beauty and personal services',
+  'Consulting, training and tutoring',
+  'Equipment repair',
+  'Other services',
+]
+
+export const COUNTIES = [
+  'Nairobi', 'Kiambu', "Murang'a", 'Nakuru', 'Mombasa', 'Kisumu', 'Machakos', 'Kajiado',
+  'Nyeri', 'Uasin Gishu', 'Meru', 'Kirinyaga', 'Embu', 'Kakamega', 'Kisii', 'Nyandarua',
+]
+
+export const AVAILABILITY = {
+  in_stock: 'In stock',
+  out_of_stock: 'Out of stock',
+  on_request: 'On request',
+  available: 'Available',
+  busy: 'Busy',
+  unavailable: 'Unavailable',
+}
+
+export function money(min, max) {
+  if (min == null && max == null) return 'Ask for price'
+  const f = (n) => 'KES ' + Number(n).toLocaleString('en-KE')
+  if (min != null && max != null && Number(max) > Number(min)) return `${f(min)} - ${f(max)}`
+  return f(min ?? max)
+}
+
+export const place = (town, county) => [town, county].filter(Boolean).join(', ')

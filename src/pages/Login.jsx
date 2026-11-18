@@ -11,6 +11,12 @@ export default function Login() {
   const [msg, setMsg] = useState('')
   const [busy, setBusy] = useState(false)
 
+  async function forgot() {
+    if (!email) { setMsg('Type your email above first, then tap Forgot password.'); return }
+    const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin })
+    setMsg(error ? error.message : 'If that email has an account, a reset link is on its way.')
+  }
+
   async function submit(e) {
     e.preventDefault()
     setBusy(true)
@@ -50,6 +56,7 @@ export default function Login() {
       <button className="btn" disabled={busy}>
         {busy ? 'Please wait...' : mode === 'login' ? 'Log in' : 'Sign up'}
       </button>
+      {mode === 'login' && <button type="button" className="linkbtn" onClick={forgot}>Forgot password?</button>}
       <button type="button" className="linkbtn" onClick={() => { setMode(mode === 'login' ? 'register' : 'login'); setMsg('') }}>
         {mode === 'login' ? 'New here? Create an account' : 'Already have an account? Log in'}
       </button>

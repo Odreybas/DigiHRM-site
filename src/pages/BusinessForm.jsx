@@ -7,14 +7,14 @@ export default function BusinessForm() {
   const { id } = useParams()
   const { user, profile, reloadProfile } = useAuth()
   const nav = useNavigate()
-  const [f, setF] = useState({ name: '', category: '', location: '', phone: '', description: '' })
+  const [f, setF] = useState({ name: '', category: '', location: '', county: '', delivery_areas: '', phone: '', description: '' })
   const [msg, setMsg] = useState('')
   const [busy, setBusy] = useState(false)
 
   useEffect(() => {
     if (!id) return
     supabase.from('businesses').select('*').eq('id', id).maybeSingle().then(({ data }) => {
-      if (data) setF({ name: data.name, category: data.category, location: data.location, phone: data.phone, description: data.description })
+      if (data) setF({ name: data.name, category: data.category, location: data.location, county: data.county, delivery_areas: data.delivery_areas, phone: data.phone, description: data.description })
     })
   }, [id])
 
@@ -51,6 +51,8 @@ export default function BusinessForm() {
       <label>Business name<input value={f.name} onChange={set('name')} required /></label>
       <label>Type of business<input value={f.category} onChange={set('category')} placeholder="e.g. Steel supplier, Plumbing" /></label>
       <label>Location<input value={f.location} onChange={set('location')} placeholder="Town, county" /></label>
+      <label>County<input value={f.county} onChange={set('county')} /></label>
+      <label>Delivers to (towns or counties)<input value={f.delivery_areas} onChange={set('delivery_areas')} placeholder="e.g. Kiambu, Machakos, Nakuru" /></label>
       <label>Phone<input value={f.phone} onChange={set('phone')} /></label>
       <label>Description<textarea rows={4} value={f.description} onChange={set('description')} /></label>
       {msg && <p className="notice">{msg}</p>}
