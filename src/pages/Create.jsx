@@ -8,7 +8,7 @@ export default function Create() {
       <Link to="/service/new" className="card item"><strong>Add a service</strong><span className="muted">Offer your skills or trade to people nearby.</span></Link>
       <Link to="/business/new" className="card item"><strong>Add a business</strong><span className="muted">Create a page for your shop or company.</span></Link>
       <Link to="/job/new" className="card item"><strong>Post a job</strong><span className="muted">Hire staff, interns or casual workers.</span></Link>
-      <div className="card"><strong>Posts, photos and videos</strong><p className="muted">Coming in a later phase.</p></div>
+      <Link to="/post/new" className="card item"><strong>Share a post, photo or video</strong><span className="muted">Show your work, new stock or a vacancy.</span></Link>
     </>
   )
 }

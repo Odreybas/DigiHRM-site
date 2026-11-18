@@ -21,6 +21,10 @@ import JobPage from './pages/JobPage.jsx'
 import JobForm from './pages/JobForm.jsx'
 import Applicants from './pages/Applicants.jsx'
 import MyApplications from './pages/MyApplications.jsx'
+import Notifications from './pages/Notifications.jsx'
+import PostForm from './pages/PostForm.jsx'
+import PostPage from './pages/PostPage.jsx'
+import { useNotifs } from './notifications.jsx'
 
 function Protected({ children }) {
   const { user, loading } = useAuth()
@@ -31,6 +35,7 @@ function Protected({ children }) {
 
 export default function App() {
   const { user } = useAuth()
+  const { unread } = useNotifs()
   const nav = useNavigate()
 
   async function logout() {
@@ -44,6 +49,7 @@ export default function App() {
         <Link to="/" className="logo">DigiHRM</Link>
         <nav>
           {user && <NavLink to="/saved">Saved</NavLink>}
+          {user && <NavLink to="/notifications">Alerts{unread > 0 && <span className="badge">{unread}</span>}</NavLink>}
           {user ? (
             <button className="linkbtn" onClick={logout}>Log out</button>
           ) : (
@@ -61,6 +67,9 @@ export default function App() {
           <Route path="/product/:id" element={<ProductPage />} />
           <Route path="/service/:id" element={<ServicePage />} />
           <Route path="/messages" element={<Messages />} />
+          <Route path="/post/:id" element={<PostPage />} />
+          <Route path="/post/new" element={<Protected><PostForm /></Protected>} />
+          <Route path="/notifications" element={<Protected><Notifications /></Protected>} />
           <Route path="/job/:id" element={<JobPage />} />
           <Route path="/job/new" element={<Protected><JobForm /></Protected>} />
           <Route path="/job/:id/edit" element={<Protected><JobForm /></Protected>} />

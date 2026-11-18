@@ -8,6 +8,7 @@ export function AuthProvider({ children }) {
   const [session, setSession] = useState(undefined)
   const [profile, setProfile] = useState(null)
   const [saved, setSaved] = useState(new Set())
+  const [following, setFollowing] = useState(new Set())
 
   async function loadProfile(uid) {
     const { data } = await supabase.from('profiles').select('*').eq('id', uid).maybeSingle()
@@ -29,9 +30,12 @@ export function AuthProvider({ children }) {
       loadProfile(uid)
       supabase.from('saved_items').select('kind,item_id').eq('user_id', uid).then(({ data }) =>
         setSaved(new Set((data || []).map((r) => `${r.kind}:${r.item_id}`))))
+      supabase.from('follows').select('following_id').eq('follower_id', uid).then(({ data }) =>
+        setFollowing(new Set((data || []).map((r) => r.following_id))))
     } else {
       setProfile(null)
       setSaved(new Set())
+      setFollowing(new Set())
     }
   }, [uid])
 
@@ -49,6 +53,19 @@ export function AuthProvider({ children }) {
     }
   }
 
+  async function toggleFollow(id) {
+    const next = new Set(following)
+    if (following.has(id)) {
+      next.delete(id)
+      setFollowing(next)
+      await supabase.from('follows').delete().eq('follower_id', uid).eq('following_id', id)
+    } else {
+      next.add(id)
+      setFollowing(next)
+      await supabase.from('follows').insert({ follower_id: uid, following_id: id })
+    }
+  }
+
   const value = {
     user: session?.user || null,
     profile,
@@ -56,6 +73,8 @@ export function AuthProvider({ children }) {
     reloadProfile: () => uid && loadProfile(uid),
     saved,
     toggleSaved,
+    following,
+    toggleFollow,
   }
   return <AuthCtx.Provider value={value}>{children}</AuthCtx.Provider>
 }

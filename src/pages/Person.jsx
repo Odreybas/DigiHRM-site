@@ -3,6 +3,8 @@ import { Link, useParams } from 'react-router-dom'
 import { supabase, capLabel } from '../supabase'
 import { ServiceCard } from '../components/Cards.jsx'
 import SaveButton from '../components/SaveButton.jsx'
+import FollowButton from '../components/FollowButton.jsx'
+import Feed from '../components/Feed.jsx'
 
 export default function Person() {
   const { id } = useParams()
@@ -10,6 +12,7 @@ export default function Person() {
   const [skills, setSkills] = useState([])
   const [biz, setBiz] = useState([])
   const [services, setServices] = useState([])
+  const [followers, setFollowers] = useState(0)
 
   useEffect(() => {
     supabase.from('profiles').select('*').eq('id', id).maybeSingle().then(({ data }) => setP(data))
@@ -17,6 +20,7 @@ export default function Person() {
       setSkills((data || []).map((r) => r.skills?.name).filter(Boolean)))
     supabase.from('businesses').select('id,name,category').eq('owner_id', id).then(({ data }) => setBiz(data || []))
     supabase.from('services').select('*,businesses(name)').eq('owner_id', id).then(({ data }) => setServices(data || []))
+    supabase.from('follows').select('follower_id', { count: 'exact', head: true }).eq('following_id', id).then(({ count }) => setFollowers(count || 0))
   }, [id])
 
   if (p === undefined) return <p className="muted">Loading...</p>
@@ -25,7 +29,8 @@ export default function Person() {
   return (
     <>
     <div className="card">
-      <div className="between"><h2>{p.full_name || 'Unnamed'}</h2><SaveButton kind="person" id={p.id} /></div>
+      <div className="between"><h2>{p.full_name || 'Unnamed'}</h2><span className="row"><FollowButton userId={p.id} /><SaveButton kind="person" id={p.id} /></span></div>
+      <p className="muted small">{followers} follower{followers === 1 ? '' : 's'}</p>
       <p className="muted">{p.title}{p.location ? ` - ${p.location}` : ''}</p>
       {p.bio && <p>{p.bio}</p>}
       <h3>Skills</h3>
@@ -39,6 +44,8 @@ export default function Person() {
         </>
       )}
     </div>
+    <h3>Posts</h3>
+    <Feed ownerId={p.id} />
     {services.length > 0 && <><h3>Services offered</h3>{services.map((s) => <ServiceCard key={s.id} s={s} />)}</>}
     </>
   )
