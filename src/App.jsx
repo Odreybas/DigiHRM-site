@@ -53,7 +53,7 @@ export default function App() {
           <Route path="/profile/edit" element={<Protected><EditProfile /></Protected>} />
           <Route path="/business/new" element={<Protected><BusinessForm /></Protected>} />
           <Route path="/business/:id/edit" element={<Protected><BusinessForm /></Protected>} />
-          <Route path="*" element={<p>Page not found.</p>} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
     </>
