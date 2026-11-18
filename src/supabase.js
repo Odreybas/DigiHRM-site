@@ -74,3 +74,38 @@ export function money(min, max) {
 }
 
 export const place = (town, county) => [town, county].filter(Boolean).join(', ')
+
+export const JOB_TYPES = {
+  full_time: 'Full-time',
+  part_time: 'Part-time',
+  contract: 'Contract',
+  internship: 'Internship',
+  industrial_attachment: 'Industrial attachment',
+  graduate_trainee: 'Graduate trainee',
+  apprenticeship: 'Apprenticeship',
+  remote: 'Remote',
+  temporary: 'Temporary',
+  freelance: 'Freelance',
+  casual: 'Casual work',
+}
+
+export const STAGES = {
+  submitted: 'Submitted',
+  under_review: 'Under review',
+  shortlisted: 'Shortlisted',
+  interview: 'Interview',
+  offered: 'Offered',
+  hired: 'Hired',
+  rejected: 'Rejected',
+  withdrawn: 'Withdrawn',
+}
+
+export function salary(min, max) {
+  if (min == null && max == null) return 'Pay not stated'
+  const f = (n) => 'KES ' + Number(n).toLocaleString('en-KE')
+  if (min != null && max != null && Number(max) > Number(min)) return `${f(min)} - ${f(max)}`
+  return f(min ?? max)
+}
+
+export const isClosed = (job) =>
+  job.status === 'closed' || (job.deadline && job.deadline < new Date().toISOString().slice(0, 10))

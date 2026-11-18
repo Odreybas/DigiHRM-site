@@ -17,6 +17,10 @@ import Create from './pages/Create.jsx'
 import Saved from './pages/Saved.jsx'
 import Account from './pages/Account.jsx'
 import Messages from './pages/Messages.jsx'
+import JobPage from './pages/JobPage.jsx'
+import JobForm from './pages/JobForm.jsx'
+import Applicants from './pages/Applicants.jsx'
+import MyApplications from './pages/MyApplications.jsx'
 
 function Protected({ children }) {
   const { user, loading } = useAuth()
@@ -57,6 +61,11 @@ export default function App() {
           <Route path="/product/:id" element={<ProductPage />} />
           <Route path="/service/:id" element={<ServicePage />} />
           <Route path="/messages" element={<Messages />} />
+          <Route path="/job/:id" element={<JobPage />} />
+          <Route path="/job/new" element={<Protected><JobForm /></Protected>} />
+          <Route path="/job/:id/edit" element={<Protected><JobForm /></Protected>} />
+          <Route path="/job/:id/applicants" element={<Protected><Applicants /></Protected>} />
+          <Route path="/applications" element={<Protected><MyApplications /></Protected>} />
           <Route path="/dashboard" element={<Protected><Dashboard /></Protected>} />
           <Route path="/profile/edit" element={<Protected><EditProfile /></Protected>} />
           <Route path="/account" element={<Protected><Account /></Protected>} />

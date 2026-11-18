@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { supabase, clean, COUNTIES, PRODUCT_CATEGORIES, SERVICE_CATEGORIES } from '../supabase'
-import { ProductCard, ServiceCard, BusinessCard, PersonCard } from '../components/Cards.jsx'
+import { supabase, clean, COUNTIES, PRODUCT_CATEGORIES, SERVICE_CATEGORIES, JOB_TYPES } from '../supabase'
+import { ProductCard, ServiceCard, BusinessCard, PersonCard, JobCard } from '../components/Cards.jsx'
 
 const TABS = [
   ['all', 'All'], ['people', 'People'], ['products', 'Products'],
@@ -16,8 +16,9 @@ export default function Explore() {
   const [category, setCategory] = useState('')
   const [maxPrice, setMaxPrice] = useState('')
   const [skill, setSkill] = useState('')
+  const [jobType, setJobType] = useState('')
   const [skills, setSkills] = useState([])
-  const [data, setData] = useState({ people: [], products: [], services: [], businesses: [] })
+  const [data, setData] = useState({ people: [], products: [], services: [], businesses: [], jobs: [] })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -70,15 +71,26 @@ export default function Explore() {
     return q
   }
 
+  function searchJobs(limit) {
+    let q = supabase.from('jobs').select('*,businesses(name)').eq('status', 'open').order('created_at', { ascending: false }).limit(limit)
+    const t = clean(text)
+    if (t) q = q.or(`title.ilike.%${t}%,description.ilike.%${t}%,requirements.ilike.%${t}%,qualifications.ilike.%${t}%`)
+    const c = clean(county)
+    if (c) q = q.or(`county.ilike.%${c}%,town.ilike.%${c}%`)
+    if (jobType) q = q.eq('job_type', jobType)
+    return q
+  }
+
   async function search() {
     setLoading(true)
     setError('')
-    const next = { people: [], products: [], services: [], businesses: [] }
+    const next = { people: [], products: [], services: [], businesses: [], jobs: [] }
     const limit = tab === 'all' ? 5 : 50
     const jobs = []
     if (tab === 'all' || tab === 'people') jobs.push(searchPeople(limit).then((q) => q).then((r) => ['people', r]))
     if (tab === 'all' || tab === 'products') jobs.push(searchProducts(limit).then((r) => ['products', r]))
     if (tab === 'all' || tab === 'services') jobs.push(searchServices(limit).then((r) => ['services', r]))
+    if (tab === 'all' || tab === 'jobs') jobs.push(searchJobs(limit).then((r) => ['jobs', r]))
     if (tab === 'all' || tab === 'businesses') jobs.push(searchBusinesses(limit).then((r) => ['businesses', r]))
     const results = await Promise.all(jobs)
     for (const [key, r] of results) {
@@ -97,7 +109,7 @@ export default function Explore() {
   const setTab = (t) => setParams({ tab: t, q: text })
   const showCategory = tab === 'products' || tab === 'services'
   const categories = tab === 'services' ? SERVICE_CATEGORIES : PRODUCT_CATEGORIES
-  const total = data.people.length + data.products.length + data.services.length + data.businesses.length
+  const total = data.jobs.length + data.people.length + data.products.length + data.services.length + data.businesses.length
 
   return (
     <>
@@ -108,9 +120,7 @@ export default function Explore() {
         ))}
       </div>
 
-      {tab === 'jobs' ? (
-        <div className="card"><strong>Jobs are coming soon</strong><p className="muted">Vacancies and applications arrive in the next phase.</p></div>
-      ) : (
+      {(
         <>
           <form className="filters" onSubmit={(e) => { e.preventDefault(); search() }}>
             <input placeholder="Search..." value={text} onChange={(e) => setText(e.target.value)} />
@@ -125,6 +135,12 @@ export default function Explore() {
             {tab === 'products' && (
               <input type="number" min="0" placeholder="Max price (KES)" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} />
             )}
+            {tab === 'jobs' && (
+              <select value={jobType} onChange={(e) => setJobType(e.target.value)}>
+                <option value="">Any job type</option>
+                {Object.entries(JOB_TYPES).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+              </select>
+            )}
             {tab === 'people' && (
               <select value={skill} onChange={(e) => setSkill(e.target.value)}>
                 <option value="">Any skill</option>
@@ -138,6 +154,7 @@ export default function Explore() {
           {loading && <p className="muted">Searching...</p>}
           {!loading && total === 0 && <p className="muted">No results. Try a different search.</p>}
 
+          {data.jobs.length > 0 && <><h3>Jobs</h3>{data.jobs.map((j) => <JobCard key={j.id} j={j} />)}</>}
           {data.people.length > 0 && <><h3>People</h3>{data.people.map((p) => <PersonCard key={p.id} p={p} />)}</>}
           {data.products.length > 0 && <><h3>Products</h3>{data.products.map((p) => <ProductCard key={p.id} p={p} />)}</>}
           {data.services.length > 0 && <><h3>Services</h3>{data.services.map((s) => <ServiceCard key={s.id} s={s} />)}</>}

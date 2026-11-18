@@ -9,6 +9,8 @@ export default function Dashboard() {
   const [biz, setBiz] = useState([])
   const [products, setProducts] = useState([])
   const [services, setServices] = useState([])
+  const [jobs, setJobs] = useState([])
+  const [appCount, setAppCount] = useState(0)
 
   useEffect(() => {
     if (!user) return
@@ -17,6 +19,8 @@ export default function Dashboard() {
     supabase.from('businesses').select('id,name,category').eq('owner_id', user.id).then(({ data }) => setBiz(data || []))
     supabase.from('products').select('id,name').eq('owner_id', user.id).then(({ data }) => setProducts(data || []))
     supabase.from('services').select('id,title').eq('owner_id', user.id).then(({ data }) => setServices(data || []))
+    supabase.from('jobs').select('id,title,status,applications(count)').eq('owner_id', user.id).then(({ data }) => setJobs(data || []))
+    supabase.from('applications').select('id', { count: 'exact', head: true }).eq('applicant_id', user.id).then(({ count }) => setAppCount(count || 0))
   }, [user])
 
   if (!profile) return <p className="muted">Loading...</p>
@@ -71,12 +75,27 @@ export default function Dashboard() {
         <Link className="btn ghost" to="/service/new">Add a service</Link>
       </div>
 
-      {has('employer') && (
-        <div className="card">
-          <strong>Hiring</strong>
-          <p className="muted">Posting jobs and managing applicants is coming in the next phase.</p>
+      <div className="card">
+        <strong>Your jobs</strong>
+        {jobs.length === 0 && <p className="muted">You have not posted a job yet.</p>}
+        {jobs.map((j) => (
+          <p key={j.id}>
+            <Link to={`/job/${j.id}`}>{j.title}</Link>{' '}
+            <span className="muted">{j.status} - {j.applications?.[0]?.count || 0} applicants</span>{' '}
+            <Link to={`/job/${j.id}/applicants`}>applicants</Link>
+          </p>
+        ))}
+        <div className="row wrap">
+          <Link className="btn ghost" to="/job/new">Post a job</Link>
+          <Link className="btn ghost" to="/explore?tab=people">Find candidates</Link>
         </div>
-      )}
+      </div>
+
+      <div className="card">
+        <strong>Your applications: {appCount}</strong>
+        <p className="muted">Track where each job application stands.</p>
+        <Link className="btn ghost" to="/applications">View applications</Link>
+      </div>
     </>
   )
 }

@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import SaveButton from './SaveButton.jsx'
-import { AVAILABILITY, money, place } from '../supabase'
+import { AVAILABILITY, JOB_TYPES, money, place, salary, isClosed } from '../supabase'
 
 export function ProductCard({ p }) {
   return (
@@ -69,6 +69,27 @@ export function PersonCard({ p }) {
       <span className="muted">{p.title || 'No title yet'}{p.location ? ` - ${p.location}` : ''}</span>
       <span className="chips">
         {(p.profile_skills || []).slice(0, 5).map((ps, i) => <em key={i}>{ps.skills?.name}</em>)}
+      </span>
+    </Link>
+  )
+}
+
+export function JobCard({ j }) {
+  return (
+    <Link to={`/job/${j.id}`} className="card item">
+      <div className="between">
+        <strong>{j.title}</strong>
+        <SaveButton kind="job" id={j.id} />
+      </div>
+      <span className="muted">
+        {j.businesses?.name ? `${j.businesses.name} - ` : ''}
+        {place(j.town, j.county) || 'Location not stated'}
+      </span>
+      <span className="price">{salary(j.salary_min, j.salary_max)}</span>
+      <span className="chips">
+        <em>{JOB_TYPES[j.job_type]}</em>
+        {j.deadline && <em>Closes {j.deadline}</em>}
+        {isClosed(j) && <em>Closed</em>}
       </span>
     </Link>
   )
