@@ -4,7 +4,10 @@ import { HashRouter } from 'react-router-dom'
 import App from './App.jsx'
 import { AuthProvider } from './auth.jsx'
 import { NotificationsProvider } from './notifications.jsx'
+import { registerSW } from './push.js'
 import './index.css'
+
+registerSW()
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
