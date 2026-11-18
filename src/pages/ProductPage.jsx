@@ -3,6 +3,9 @@ import { Link, useParams } from 'react-router-dom'
 import { supabase, AVAILABILITY, money, place } from '../supabase'
 import { useAuth } from '../auth.jsx'
 import SaveButton from '../components/SaveButton.jsx'
+import MessageButton from '../components/MessageButton.jsx'
+import Reviews from '../components/Reviews.jsx'
+import Badges from '../components/Badges.jsx'
 
 export default function ProductPage() {
   const { id } = useParams()
@@ -19,6 +22,7 @@ export default function ProductPage() {
   const b = p.businesses
 
   return (
+    <>
     <div className="card">
       <div className="between"><h2>{p.name}</h2><SaveButton kind="product" id={p.id} /></div>
       <p className="price">{money(p.price, p.price_max)}</p>
@@ -35,10 +39,14 @@ export default function ProductPage() {
         <>
           <h3>Seller</h3>
           <p><Link to={`/business/${b.id}`}>{b.name}</Link></p>
-          {b.phone && <p><a className="btn" href={`tel:${b.phone}`}>Call to request a quotation</a></p>}
+          <Badges businessId={b.id} />
+          {b.phone && <p><a className="btn ghost" href={`tel:${b.phone}`}>Call</a></p>}
         </>
       )}
+      <p><MessageButton toId={p.owner_id} kind="product" id={p.id} title={p.name} label="Send enquiry or ask for a quotation" /></p>
       {user?.id === p.owner_id && <Link className="btn ghost" to={`/product/${p.id}/edit`}>Edit product</Link>}
     </div>
+    <Reviews kind="product" id={p.id} ownerId={p.owner_id} />
+    </>
   )
 }

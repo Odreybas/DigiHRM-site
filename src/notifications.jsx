@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from './supabase'
 import { useAuth } from './auth.jsx'
 
-const Ctx = createContext({ items: [], unread: 0 })
+const Ctx = createContext({ items: [], unread: 0, unreadMessages: 0 })
 export const useNotifs = () => useContext(Ctx)
 
 export function NotificationsProvider({ children }) {
@@ -11,6 +11,7 @@ export function NotificationsProvider({ children }) {
   const nav = useNavigate()
   const [items, setItems] = useState([])
   const [toast, setToast] = useState(null)
+  const [unreadMessages, setUnreadMessages] = useState(0)
   const uid = user?.id
 
   useEffect(() => {
@@ -38,6 +39,21 @@ export function NotificationsProvider({ children }) {
   }, [uid])
 
   useEffect(() => {
+    if (!uid) {
+      setUnreadMessages(0)
+      return
+    }
+    const count = () =>
+      supabase.from('messages').select('id', { count: 'exact', head: true }).is('read_at', null).neq('sender_id', uid)
+        .then(({ count: c }) => setUnreadMessages(c || 0))
+    count()
+    const ch = supabase.channel(`msgcount-${uid}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, () => count())
+      .subscribe()
+    return () => { supabase.removeChannel(ch) }
+  }, [uid])
+
+  useEffect(() => {
     if (!toast) return
     const t = setTimeout(() => setToast(null), 6000)
     return () => clearTimeout(t)
@@ -58,7 +74,7 @@ export function NotificationsProvider({ children }) {
   const unread = items.filter((n) => !n.read_at).length
 
   return (
-    <Ctx.Provider value={{ items, unread, markRead, markAllRead }}>
+    <Ctx.Provider value={{ items, unread, unreadMessages, markRead, markAllRead }}>
       {children}
       {toast && (
         <div

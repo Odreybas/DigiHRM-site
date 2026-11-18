@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { supabase, JOB_TYPES, STAGES, salary, place, isClosed } from '../supabase'
 import { useAuth } from '../auth.jsx'
 import SaveButton from '../components/SaveButton.jsx'
+import MessageButton from '../components/MessageButton.jsx'
 
 export default function JobPage() {
   const { id } = useParams()
@@ -96,6 +97,7 @@ export default function JobPage() {
             </form>
           )}
           {msg && app && <p className="notice">{msg}</p>}
+          <p><MessageButton toId={j.owner_id} kind="job" id={j.id} title={j.title} label="Message the employer" /></p>
         </div>
       )}
     </>

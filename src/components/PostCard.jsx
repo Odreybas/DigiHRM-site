@@ -18,7 +18,7 @@ export default function PostCard({ post, liked, onLike, onDelete, openComments =
   const isOwner = user?.id === post.owner_id
 
   async function loadComments() {
-    const { data } = await supabase.from('post_comments').select('id,body,created_at,user_id,profiles(id,full_name)')
+    const { data } = await supabase.from('post_comments').select('id,body,created_at,user_id,profiles!post_comments_user_id_fkey(id,full_name)')
       .eq('post_id', post.id).order('created_at', { ascending: true })
     setComments(data || [])
   }

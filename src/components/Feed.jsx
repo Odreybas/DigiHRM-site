@@ -21,7 +21,7 @@ export default function Feed({ topic = 'all', followingOnly = false, ownerId = n
     setError('')
     let q = supabase
       .from('posts')
-      .select('*,profiles(id,full_name),businesses(id,name),post_likes(count),post_comments(count)')
+      .select('*,profiles!posts_owner_id_fkey(id,full_name),businesses!posts_business_id_fkey(id,name),post_likes(count),post_comments(count)')
       .order('created_at', { ascending: false })
       .range(from, from + PAGE - 1)
     if (topic !== 'all') q = q.eq('topic', topic)

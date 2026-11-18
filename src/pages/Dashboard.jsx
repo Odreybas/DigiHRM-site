@@ -11,6 +11,7 @@ export default function Dashboard() {
   const [services, setServices] = useState([])
   const [jobs, setJobs] = useState([])
   const [appCount, setAppCount] = useState(0)
+  const [isAdmin, setIsAdmin] = useState(false)
 
   useEffect(() => {
     if (!user) return
@@ -20,6 +21,7 @@ export default function Dashboard() {
     supabase.from('products').select('id,name').eq('owner_id', user.id).then(({ data }) => setProducts(data || []))
     supabase.from('services').select('id,title').eq('owner_id', user.id).then(({ data }) => setServices(data || []))
     supabase.from('jobs').select('id,title,status,applications(count)').eq('owner_id', user.id).then(({ data }) => setJobs(data || []))
+    supabase.from('admins').select('user_id').eq('user_id', user.id).maybeSingle().then(({ data }) => setIsAdmin(!!data))
     supabase.from('applications').select('id', { count: 'exact', head: true }).eq('applicant_id', user.id).then(({ count }) => setAppCount(count || 0))
   }, [user])
 
@@ -42,6 +44,8 @@ export default function Dashboard() {
           <Link className="btn" to="/profile/edit">Edit profile</Link>
           <Link className="btn ghost" to={`/people/${user.id}`}>Public profile</Link>
           <Link className="btn ghost" to="/account">Account</Link>
+          <Link className="btn ghost" to="/verify">Get verified</Link>
+          {isAdmin && <Link className="btn ghost" to="/admin">Admin</Link>}
         </div>
       </div>
 

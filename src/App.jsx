@@ -24,6 +24,9 @@ import MyApplications from './pages/MyApplications.jsx'
 import Notifications from './pages/Notifications.jsx'
 import PostForm from './pages/PostForm.jsx'
 import PostPage from './pages/PostPage.jsx'
+import Chat from './pages/Chat.jsx'
+import Verify from './pages/Verify.jsx'
+import Admin from './pages/Admin.jsx'
 import { useNotifs } from './notifications.jsx'
 
 function Protected({ children }) {
@@ -35,7 +38,7 @@ function Protected({ children }) {
 
 export default function App() {
   const { user } = useAuth()
-  const { unread } = useNotifs()
+  const { unread, unreadMessages } = useNotifs()
   const nav = useNavigate()
 
   async function logout() {
@@ -67,6 +70,9 @@ export default function App() {
           <Route path="/product/:id" element={<ProductPage />} />
           <Route path="/service/:id" element={<ServicePage />} />
           <Route path="/messages" element={<Messages />} />
+          <Route path="/messages/:id" element={<Protected><Chat /></Protected>} />
+          <Route path="/verify" element={<Protected><Verify /></Protected>} />
+          <Route path="/admin" element={<Protected><Admin /></Protected>} />
           <Route path="/post/:id" element={<PostPage />} />
           <Route path="/post/new" element={<Protected><PostForm /></Protected>} />
           <Route path="/notifications" element={<Protected><Notifications /></Protected>} />
@@ -93,7 +99,7 @@ export default function App() {
         <NavLink to="/" end>Home</NavLink>
         <NavLink to="/explore">Explore</NavLink>
         <NavLink to="/create">Create</NavLink>
-        <NavLink to="/messages">Messages</NavLink>
+        <NavLink to="/messages">Messages{unreadMessages > 0 && <span className="badge">{unreadMessages}</span>}</NavLink>
         <NavLink to={user ? '/dashboard' : '/login'}>Profile</NavLink>
       </nav>
     </>

@@ -13,7 +13,7 @@ export default function Applicants() {
     setJob(j)
     const { data, error } = await supabase
       .from('applications')
-      .select('id,status,cover_note,created_at,profiles(id,full_name,title,location,profile_skills(skills(name)))')
+      .select('id,status,cover_note,created_at,profiles!applications_applicant_id_fkey(id,full_name,title,location,profile_skills(skills(name)))')
       .eq('job_id', id)
       .order('created_at', { ascending: false })
     if (error) setMsg(error.message)
