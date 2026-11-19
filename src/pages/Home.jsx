@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../supabase'
 import { ProductCard, ServiceCard } from '../components/Cards.jsx'
 import Feed from '../components/Feed.jsx'
+import PeopleRail from '../components/PeopleRail.jsx'
 import { useAuth } from '../auth.jsx'
 
 const FEED_TOPIC = { all: 'all', people: 'people', products: 'products', services: 'services', jobs: 'jobs', businesses: 'businesses' }
@@ -44,6 +45,8 @@ export default function Home() {
         </div>
         <button className="btn">Search</button>
       </form>
+
+      <PeopleRail title="Meet people" />
 
       <h3>Feed</h3>
       <Feed topic={FEED_TOPIC[tab] || 'all'} followingOnly={tab === 'following'} />

@@ -32,7 +32,7 @@ export default function Explore() {
       const { data: d } = await supabase.from('profile_skills').select('profile_id').eq('skill_id', skill)
       ids = (d || []).map((r) => r.profile_id)
     }
-    let q = supabase.from('profiles').select('id,full_name,title,location,profile_skills(skills(name))').neq('full_name', '').limit(limit)
+    let q = supabase.from('profiles').select('id,full_name,title,location,bio,avatar_url,profile_skills(skills(name))').neq('full_name', '').limit(limit)
     if (ids) q = q.in('id', ids.length ? ids : ['00000000-0000-0000-0000-000000000000'])
     const t = clean(text)
     if (t) q = q.or(`full_name.ilike.%${t}%,title.ilike.%${t}%,location.ilike.%${t}%`)

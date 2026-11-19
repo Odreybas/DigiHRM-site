@@ -6,12 +6,14 @@ import SaveButton from '../components/SaveButton.jsx'
 import MessageButton from '../components/MessageButton.jsx'
 import Reviews from '../components/Reviews.jsx'
 import Badges from '../components/Badges.jsx'
+import { useTrack } from '../util.js'
 import { useAuth } from '../auth.jsx'
 
 export default function BusinessPage() {
   const { id } = useParams()
   const { user } = useAuth()
   const [b, setB] = useState(undefined)
+  useTrack('business', id)
   const [owner, setOwner] = useState(null)
   const [products, setProducts] = useState([])
   const [services, setServices] = useState([])

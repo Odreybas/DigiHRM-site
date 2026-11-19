@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { supabase, CAPABILITIES } from '../supabase'
 import { useAuth } from '../auth.jsx'
+import { uploadMedia, removeMedia } from '../util.js'
+import Avatar from '../components/Avatar.jsx'
 
 export default function EditProfile() {
   const { user, profile, reloadProfile } = useAuth()
@@ -13,10 +15,12 @@ export default function EditProfile() {
   const [custom, setCustom] = useState('')
   const [msg, setMsg] = useState('')
   const [busy, setBusy] = useState(false)
+  const [avatarFile, setAvatarFile] = useState(null)
+  const [coverFile, setCoverFile] = useState(null)
 
   useEffect(() => {
     if (profile && !f) {
-      setF({ full_name: profile.full_name, title: profile.title, bio: profile.bio, location: profile.location, capabilities: profile.capabilities })
+      setF({ full_name: profile.full_name, title: profile.title, bio: profile.bio, location: profile.location, capabilities: profile.capabilities, avatar_url: profile.avatar_url, cover_url: profile.cover_url })
     }
   }, [profile, f])
 
@@ -65,7 +69,22 @@ export default function EditProfile() {
     e.preventDefault()
     setBusy(true)
     setMsg('')
-    const { error } = await supabase.from('profiles').update(f).eq('id', user.id)
+    const next = { ...f }
+    try {
+      if (avatarFile) {
+        if (!avatarFile.type.startsWith('image/')) throw new Error('Profile picture must be a photo.')
+        const up = await uploadMedia(avatarFile, user.id, 512)
+        if (f.avatar_url) removeMedia(f.avatar_url)
+        next.avatar_url = up.url
+      }
+      if (coverFile) {
+        if (!coverFile.type.startsWith('image/')) throw new Error('Cover must be a photo.')
+        const up = await uploadMedia(coverFile, user.id, 1280)
+        if (f.cover_url) removeMedia(f.cover_url)
+        next.cover_url = up.url
+      }
+    } catch (err) { setMsg(err.message || 'Upload failed'); setBusy(false); return }
+    const { error } = await supabase.from('profiles').update(next).eq('id', user.id)
     if (error) { setMsg(error.message); setBusy(false); return }
 
     const toAdd = [...picked].filter((id) => !original.has(id))
@@ -87,11 +106,21 @@ export default function EditProfile() {
   return (
     <form className="card" onSubmit={save}>
       <h2>Edit profile</h2>
+      <div className="row" style={{ marginBottom: 12 }}>
+        <Avatar p={{ full_name: f.full_name, avatar_url: avatarFile ? URL.createObjectURL(avatarFile) : f.avatar_url }} size={72} />
+        <label className="grow">Profile picture
+          <input type="file" accept="image/*" onChange={(e) => setAvatarFile(e.target.files?.[0] || null)} />
+        </label>
+      </div>
+      <label>Cover photo (optional)
+        <input type="file" accept="image/*" onChange={(e) => setCoverFile(e.target.files?.[0] || null)} />
+      </label>
       <label>Full name<input value={f.full_name} onChange={set('full_name')} required /></label>
       <label>Professional title<input value={f.title} onChange={set('title')} placeholder="e.g. Electrician, Web developer" /></label>
       <label>Location<input value={f.location} onChange={set('location')} placeholder="Town, county" /></label>
       <label>About you<textarea rows={4} value={f.bio} onChange={set('bio')} /></label>
 
+      <p><Link to="/profile/achievements">Add achievements, experience, education and certificates</Link></p>
       <h3>What do you do on DigiHRM?</h3>
       <div className="chips pick">
         {CAPABILITIES.map(([key, label]) => (

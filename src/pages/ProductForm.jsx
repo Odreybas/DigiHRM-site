@@ -5,7 +5,7 @@ import { useAuth } from '../auth.jsx'
 
 const empty = {
   name: '', category: '', brand: '', description: '', price: '', price_max: '', min_order: '',
-  availability: 'in_stock', town: '', county: '', delivery_areas: '', business_id: '',
+  availability: 'in_stock', town: '', county: '', delivery_areas: '', business_id: '', stock: '', reorder_level: 5, owner_id: '',
 }
 
 export default function ProductForm() {
@@ -18,13 +18,20 @@ export default function ProductForm() {
   const [busy, setBusy] = useState(false)
 
   useEffect(() => {
-    supabase.from('businesses').select('id,name').eq('owner_id', user.id).then(({ data }) => setBizList(data || []))
+    async function loadBiz() {
+      const { data: own } = await supabase.from('businesses').select('id,name,owner_id').eq('owner_id', user.id)
+      const { data: mem } = await supabase.from('business_members')
+        .select('role,businesses!business_members_business_id_fkey(id,name,owner_id)').eq('user_id', user.id)
+      const extra = (mem || []).filter((m) => ['administrator', 'manager', 'content_editor'].includes(m.role)).map((m) => m.businesses).filter(Boolean)
+      setBizList([...(own || []), ...extra])
+    }
+    loadBiz()
     if (id) {
       supabase.from('products').select('*').eq('id', id).maybeSingle().then(({ data }) => {
         if (data) setF({
           ...empty, ...data,
           price: data.price ?? '', price_max: data.price_max ?? '', min_order: data.min_order ?? '',
-          business_id: data.business_id || '',
+          business_id: data.business_id || '', stock: data.stock ?? '', reorder_level: data.reorder_level ?? 5,
         })
       })
     }
@@ -43,10 +50,13 @@ export default function ProductForm() {
       min_order: f.min_order === '' ? null : Number(f.min_order),
       availability: f.availability, town: f.town, county: f.county, delivery_areas: f.delivery_areas,
       business_id: f.business_id || null,
+      stock: f.stock === '' ? null : Number(f.stock),
+      reorder_level: f.reorder_level === '' ? 5 : Number(f.reorder_level),
+      owner_id: (bizList.find((b) => b.id === f.business_id)?.owner_id) || f.owner_id || user.id,
     }
     const { error } = id
       ? await supabase.from('products').update(row).eq('id', id)
-      : await supabase.from('products').insert({ ...row, owner_id: user.id })
+      : await supabase.from('products').insert(row)
     if (error) { setMsg(error.message); setBusy(false); return }
     nav('/dashboard')
   }
@@ -82,6 +92,10 @@ export default function ProductForm() {
           <option value="on_request">On request</option>
         </select>
       </label>
+      <div className="row wrap">
+        <label className="grow">Stock on hand (leave empty if you do not track it)<input type="number" min="0" value={f.stock} onChange={set('stock')} /></label>
+        <label className="grow">Warn me when stock is at or below<input type="number" min="0" value={f.reorder_level} onChange={set('reorder_level')} /></label>
+      </div>
       <label>Town<input value={f.town} onChange={set('town')} /></label>
       <label>County<input list="counties-form" value={f.county} onChange={set('county')} /></label>
       <datalist id="counties-form">{COUNTIES.map((c) => <option key={c} value={c} />)}</datalist>

@@ -6,11 +6,14 @@ import SaveButton from '../components/SaveButton.jsx'
 import MessageButton from '../components/MessageButton.jsx'
 import Reviews from '../components/Reviews.jsx'
 import Badges from '../components/Badges.jsx'
+import BookPanel from '../components/BookPanel.jsx'
+import { useTrack } from '../util.js'
 
 export default function ServicePage() {
   const { id } = useParams()
   const { user } = useAuth()
   const [s, setS] = useState(undefined)
+  useTrack('service', id)
   const [owner, setOwner] = useState(null)
 
   useEffect(() => {
@@ -47,6 +50,7 @@ export default function ServicePage() {
       )}
       {user?.id === s.owner_id && <Link className="btn ghost" to={`/service/${s.id}/edit`}>Edit service</Link>}
     </div>
+    {user?.id !== s.owner_id && <BookPanel s={s} />}
     <Reviews kind="service" id={s.id} ownerId={s.owner_id} />
     </>
   )

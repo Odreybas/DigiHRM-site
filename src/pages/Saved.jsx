@@ -21,7 +21,7 @@ export default function Saved() {
         get('products', '*,businesses(name)', ids.product),
         get('services', '*,businesses(name)', ids.service),
         get('businesses', '*', ids.business),
-        get('profiles', 'id,full_name,title,location,profile_skills(skills(name))', ids.person),
+        get('profiles', 'id,full_name,title,location,bio,avatar_url,profile_skills(skills(name))', ids.person),
         get('jobs', '*,businesses(name)', ids.job),
       ])
       setD({ product, service, business, person, job })

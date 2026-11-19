@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom'
 import SaveButton from './SaveButton.jsx'
+import FollowButton from './FollowButton.jsx'
+import Avatar from './Avatar.jsx'
 import { AVAILABILITY, JOB_TYPES, money, place, salary, isClosed } from '../supabase'
 
 export function ProductCard({ p }) {
@@ -61,12 +63,19 @@ export function BusinessCard({ b }) {
 
 export function PersonCard({ p }) {
   return (
-    <Link to={`/people/${p.id}`} className="card item">
-      <div className="between">
-        <strong>{p.full_name}</strong>
-        <SaveButton kind="person" id={p.id} />
+    <Link to={`/people/${p.id}`} className="card item person">
+      <div className="row">
+        <Avatar p={p} size={56} />
+        <div className="grow">
+          <strong>{p.full_name}</strong>
+          <div className="muted">{p.title || 'No title yet'}{p.location ? ` - ${p.location}` : ''}</div>
+        </div>
+        <div className="stack">
+          <FollowButton userId={p.id} />
+          <SaveButton kind="person" id={p.id} />
+        </div>
       </div>
-      <span className="muted">{p.title || 'No title yet'}{p.location ? ` - ${p.location}` : ''}</span>
+      {p.bio && <span className="muted">{p.bio.slice(0, 120)}{p.bio.length > 120 ? '...' : ''}</span>}
       <span className="chips">
         {(p.profile_skills || []).slice(0, 5).map((ps, i) => <em key={i}>{ps.skills?.name}</em>)}
       </span>

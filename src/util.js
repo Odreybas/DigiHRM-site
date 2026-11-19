@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { supabase } from './supabase'
 
 export function timeAgo(iso) {
@@ -23,7 +24,7 @@ async function compressImage(file, max = 1280) {
     c.toBlob((b) => (b ? res(b) : rej(new Error('Could not process the photo'))), 'image/jpeg', 0.8))
 }
 
-export async function uploadMedia(file, uid) {
+export async function uploadMedia(file, uid, maxSize = 1280) {
   const isImage = file.type.startsWith('image/')
   const isVideo = file.type.startsWith('video/')
   if (!isImage && !isVideo) throw new Error('Choose a photo or a video.')
@@ -31,7 +32,7 @@ export async function uploadMedia(file, uid) {
   let blob = file
   let type = file.type
   if (isImage) {
-    blob = await compressImage(file)
+    blob = await compressImage(file, maxSize)
     type = 'image/jpeg'
   }
   const sub = type.split('/')[1]
@@ -48,4 +49,13 @@ export async function removeMedia(url) {
   const i = url.indexOf(marker)
   if (i === -1) return
   await supabase.storage.from('media').remove([decodeURIComponent(url.slice(i + marker.length))])
+}
+
+export function useTrack(kind, id) {
+  useEffect(() => {
+    if (!id) return
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) supabase.rpc('track_view', { p_kind: kind, p_id: id }).then(() => {})
+    })
+  }, [kind, id])
 }

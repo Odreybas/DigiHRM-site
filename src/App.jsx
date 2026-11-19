@@ -25,6 +25,9 @@ import Notifications from './pages/Notifications.jsx'
 import PostForm from './pages/PostForm.jsx'
 import PostPage from './pages/PostPage.jsx'
 import Chat from './pages/Chat.jsx'
+import Ops from './pages/Ops.jsx'
+import Activity from './pages/Activity.jsx'
+import Achievements from './pages/Achievements.jsx'
 import Verify from './pages/Verify.jsx'
 import Admin from './pages/Admin.jsx'
 import { useNotifs } from './notifications.jsx'
@@ -71,6 +74,9 @@ export default function App() {
           <Route path="/service/:id" element={<ServicePage />} />
           <Route path="/messages" element={<Messages />} />
           <Route path="/messages/:id" element={<Protected><Chat /></Protected>} />
+          <Route path="/ops" element={<Protected><Ops /></Protected>} />
+          <Route path="/activity" element={<Protected><Activity /></Protected>} />
+          <Route path="/profile/achievements" element={<Protected><Achievements /></Protected>} />
           <Route path="/verify" element={<Protected><Verify /></Protected>} />
           <Route path="/admin" element={<Protected><Admin /></Protected>} />
           <Route path="/post/:id" element={<PostPage />} />

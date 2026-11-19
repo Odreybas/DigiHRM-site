@@ -4,6 +4,7 @@ import { supabase } from '../supabase'
 import { useAuth } from '../auth.jsx'
 import { timeAgo, removeMedia } from '../util.js'
 import FollowButton from './FollowButton.jsx'
+import Avatar from './Avatar.jsx'
 
 const LINKS = { product: 'product', service: 'service', business: 'business', job: 'job' }
 
@@ -79,10 +80,13 @@ export default function PostCard({ post, liked, onLike, onDelete, openComments =
   return (
     <div className="card post">
       <div className="between">
-        <div>
+        <div className="row">
+          <Avatar p={post.profiles} size={38} />
+          <div>
           <strong><Link to={`/people/${post.profiles?.id}`}>{post.profiles?.full_name || 'Someone'}</Link></strong>
           {post.businesses && <span className="muted"> for <Link to={`/business/${post.businesses.id}`}>{post.businesses.name}</Link></span>}
           <div className="muted small" style={{ margin: 0 }}>{timeAgo(post.created_at)}</div>
+          </div>
         </div>
         <FollowButton userId={post.owner_id} />
       </div>

@@ -5,7 +5,7 @@ import { useAuth } from '../auth.jsx'
 
 const empty = {
   title: '', category: '', description: '', price_note: '', town: '', county: '',
-  areas_served: '', availability: 'available', business_id: '',
+  areas_served: '', availability: 'available', business_id: '', owner_id: '',
 }
 
 export default function ServiceForm() {
@@ -18,7 +18,14 @@ export default function ServiceForm() {
   const [busy, setBusy] = useState(false)
 
   useEffect(() => {
-    supabase.from('businesses').select('id,name').eq('owner_id', user.id).then(({ data }) => setBizList(data || []))
+    async function loadBiz() {
+      const { data: own } = await supabase.from('businesses').select('id,name,owner_id').eq('owner_id', user.id)
+      const { data: mem } = await supabase.from('business_members')
+        .select('role,businesses!business_members_business_id_fkey(id,name,owner_id)').eq('user_id', user.id)
+      const extra = (mem || []).filter((m) => ['administrator', 'manager', 'content_editor'].includes(m.role)).map((m) => m.businesses).filter(Boolean)
+      setBizList([...(own || []), ...extra])
+    }
+    loadBiz()
     if (id) {
       supabase.from('services').select('*').eq('id', id).maybeSingle().then(({ data }) => {
         if (data) setF({ ...empty, ...data, business_id: data.business_id || '' })
@@ -36,10 +43,11 @@ export default function ServiceForm() {
       title: f.title, category: f.category, description: f.description, price_note: f.price_note,
       town: f.town, county: f.county, areas_served: f.areas_served, availability: f.availability,
       business_id: f.business_id || null,
+      owner_id: (bizList.find((b) => b.id === f.business_id)?.owner_id) || f.owner_id || user.id,
     }
     const { error } = id
       ? await supabase.from('services').update(row).eq('id', id)
-      : await supabase.from('services').insert({ ...row, owner_id: user.id })
+      : await supabase.from('services').insert(row)
     if (error) { setMsg(error.message); setBusy(false); return }
     nav('/dashboard')
   }

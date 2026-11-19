@@ -4,12 +4,14 @@ import { supabase, JOB_TYPES, STAGES, salary, place, isClosed } from '../supabas
 import { useAuth } from '../auth.jsx'
 import SaveButton from '../components/SaveButton.jsx'
 import MessageButton from '../components/MessageButton.jsx'
+import { useTrack } from '../util.js'
 
 export default function JobPage() {
   const { id } = useParams()
   const { user } = useAuth()
   const nav = useNavigate()
   const [j, setJ] = useState(undefined)
+  useTrack('job', id)
   const [app, setApp] = useState(null)
   const [note, setNote] = useState('')
   const [msg, setMsg] = useState('')

@@ -10,7 +10,7 @@ export default function FollowButton({ userId }) {
     <button
       type="button"
       className={`savebtn ${on ? 'on' : ''}`}
-      onClick={() => (user ? toggleFollow(userId) : nav('/login'))}
+      onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (user) toggleFollow(userId); else nav('/login') }}
     >
       {on ? 'Following' : 'Follow'}
     </button>

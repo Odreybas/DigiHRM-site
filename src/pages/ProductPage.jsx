@@ -6,11 +6,14 @@ import SaveButton from '../components/SaveButton.jsx'
 import MessageButton from '../components/MessageButton.jsx'
 import Reviews from '../components/Reviews.jsx'
 import Badges from '../components/Badges.jsx'
+import BuyPanel from '../components/BuyPanel.jsx'
+import { useTrack } from '../util.js'
 
 export default function ProductPage() {
   const { id } = useParams()
   const { user } = useAuth()
   const [p, setP] = useState(undefined)
+  useTrack('product', id)
 
   useEffect(() => {
     supabase.from('products').select('*,businesses(id,name,phone,location,county)').eq('id', id).maybeSingle()
@@ -46,6 +49,7 @@ export default function ProductPage() {
       <p><MessageButton toId={p.owner_id} kind="product" id={p.id} title={p.name} label="Send enquiry or ask for a quotation" /></p>
       {user?.id === p.owner_id && <Link className="btn ghost" to={`/product/${p.id}/edit`}>Edit product</Link>}
     </div>
+    {user?.id !== p.owner_id && p.availability !== 'out_of_stock' && <BuyPanel p={p} />}
     <Reviews kind="product" id={p.id} ownerId={p.owner_id} />
     </>
   )

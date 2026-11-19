@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase, capLabel } from '../supabase'
 import { useAuth } from '../auth.jsx'
+import PeopleRail from '../components/PeopleRail.jsx'
 
 export default function Dashboard() {
   const { user, profile } = useAuth()
@@ -48,6 +49,17 @@ export default function Dashboard() {
           {isAdmin && <Link className="btn ghost" to="/admin">Admin</Link>}
         </div>
       </div>
+
+      <div className="card">
+        <strong>Run your business</strong>
+        <p className="muted">Orders, quotations, bookings, customers, stock, insights and your team.</p>
+        <div className="row wrap">
+          <Link className="btn" to="/ops">Business tools</Link>
+          <Link className="btn ghost" to="/activity">My orders and bookings</Link>
+        </div>
+      </div>
+
+      <PeopleRail title="People you may like" />
 
       <div className="card">
         <strong>Your skills: {skillCount}</strong>
