@@ -34,8 +34,9 @@ export default function Home() {
 
   return (
     <>
+      <div className="discover">
       <h2>Discover</h2>
-      <p className="muted">Find people, products, services and opportunities.</p>
+      <p>Find people, products, services and opportunities.</p>
       <form onSubmit={go}>
         <input placeholder="Search people, products, services..." value={q} onChange={(e) => setQ(e.target.value)} />
         <div className="chips pick" style={{ margin: '10px 0' }}>
@@ -45,6 +46,7 @@ export default function Home() {
         </div>
         <button className="btn">Search</button>
       </form>
+      </div>
 
       <PeopleRail title="Meet people" />
 

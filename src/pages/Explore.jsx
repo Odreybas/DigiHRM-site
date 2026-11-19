@@ -114,6 +114,17 @@ export default function Explore() {
   return (
     <>
       <h2>Explore</h2>
+      <p className="muted">Search everything on DigiHRM and narrow it down by place, price, category or skill.</p>
+      <div className="chips pick" style={{ marginBottom: 10 }}>
+        {[
+          ['Electrician', "Murang'a", 'services'], ['Roofing sheets', 'Nairobi', 'products'],
+          ['Web developer', '', 'people'], ['Internship', '', 'jobs'], ['Steel', 'Kiambu', 'products'],
+        ].map(([t, c, tb]) => (
+          <button type="button" key={t + tb} onClick={() => { setText(t); setCounty(c); setParams({ tab: tb, q: t }); setTimeout(() => document.getElementById('go')?.click(), 0) }}>
+            {t}{c ? ` in ${c}` : ''}
+          </button>
+        ))}
+      </div>
       <div className="chips pick" style={{ marginBottom: 12 }}>
         {TABS.map(([key, label]) => (
           <button type="button" key={key} className={tab === key ? 'on' : ''} onClick={() => setTab(key)}>{label}</button>
@@ -147,7 +158,7 @@ export default function Explore() {
                 {skills.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
               </select>
             )}
-            <button className="btn">Search</button>
+            <button id="go" className="btn">Search</button>
           </form>
 
           {error && <p className="notice">{error}</p>}

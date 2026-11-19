@@ -8,6 +8,11 @@ import { registerSW } from './push.js'
 import './index.css'
 
 registerSW()
+try {
+  document.documentElement.dataset.theme = localStorage.getItem('theme') || 'light'
+} catch {
+  document.documentElement.dataset.theme = 'light'
+}
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
